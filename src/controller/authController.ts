@@ -15,7 +15,7 @@ export const Register = async (req: Request, res: Response) => {
     });
   }
   const { firstName, lastName, email, password, profilePicUrl } = req.body;
-  const hashedPassword = bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 10);
   try {
     const user = new User({
       firstName,
@@ -25,9 +25,20 @@ export const Register = async (req: Request, res: Response) => {
       profilePicUrl,
     });
 
+    await user.save();
 
-
-  } catch (err: unknown) {}
+    res.status(200).json({
+      message: "User created successfully",
+    });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return res.status(500).json({
+        message: err.message,
+      });
+    } else {
+      return res.status(500).json({});
+    }
+  }
 
   return res.status(200).json({ message: "user registered successfully" });
 };
